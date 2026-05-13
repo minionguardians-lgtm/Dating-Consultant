@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Firebase Connection Test</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyCrrZLdKQbVV9g5MYfNq8KKnqund0NEYUk",
+      authDomain: "dating-app-consultant.firebaseapp.com",
+      databaseURL: "https://dating-app-consultant-default-rtdb.firebaseio.com",
+      projectId: "dating-app-consultant",
+      storageBucket: "dating-app-consultant.firebasestorage.app",
+      messagingSenderId: "803811516283",
+      appId: "1:803811516283:web:f66c36e0d30eab26eca7de"
+    });
+    const db = firebase.database();
+  </script>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 60px auto; padding: 20px; }
+    #status { font-size: 20px; font-weight: bold; margin: 20px 0; }
+    button { padding: 10px 24px; font-size: 16px; cursor: pointer; }
+    input { padding: 8px; font-size: 16px; margin-right: 8px; width: 200px; }
+    #log { margin-top: 20px; font-size: 13px; color: #555; }
+  </style>
+</head>
+<body>
+  <h2>🔥 Firebase Connection Test</h2>
+  <div id="status">Connecting...</div>
+
+  <div>
+    <input id="msgInput" type="text" placeholder="Type a message">
+    <button onclick="writeTest()">Write to DB</button>
+  </div>
+
+  <div id="log"></div>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const logEl = document.getElementById("log");
+
+    function log(msg) {
+      const t = new Date().toLocaleTimeString();
+      logEl.innerHTML = `[${t}] ${msg}<br>` + logEl.innerHTML;
+    }
+
+    // READ TEST: listen for changes
+    db.ref("test/message").on("value", snapshot => {
+      const val = snapshot.val();
+      if (val === null) {
+        statusEl.textContent = "✅ Connected! (no data yet)";
+        statusEl.style.color = "green";
+        log("Connected. No data in test/message yet.");
+      } else {
+        statusEl.textContent = "✅ Connected!";
+        statusEl.style.color = "green";
+        log("Read from DB: " + JSON.stringify(val));
+      }
+    }, error => {
+      statusEl.textContent = "❌ Error: " + error.message;
+      statusEl.style.color = "red";
+      log("Error: " + error.message);
+    });
+
+    // WRITE TEST
+    async function writeTest() {
+      const msg = document.getElementById("msgInput").value || "hello";
+      log("Writing: " + msg);
+      try {
+        await db.ref("test/message").set({ text: msg, time: Date.now() });
+        log("Write success!");
+      } catch(e) {
+        log("Write error: " + e.message);
+      }
+    }
+  </script>
+</body>
+</html>
